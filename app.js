@@ -1,13 +1,14 @@
 const express = require("express");
+const bodyParser = require("body-parser");
+
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
 
 const app = express();
 
-app.use("/users", (req, res, next) => {
-  res.send("<h1>Users list</h1>");
-});
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/", (req, res, next) => {
-  res.send("<h1>Main Page</h1>");
-});
+app.use(adminRoutes);
+app.use(shopRoutes);
 
 app.listen(4500);
