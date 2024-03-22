@@ -1,15 +1,13 @@
-const path = require("path");
-
 const { Router } = require("express");
-
-const rootDir = require("../utils/path,js");
 
 const router = Router();
 const products = [];
 
 router.get("/add-product", (req, res, next) => {
-  const fileLocation = path.join(rootDir, "views", "add-product.html");
-  res.sendFile(fileLocation);
+  res.render("add-product", {
+    pageTitle: "Add Product",
+    path: "/admin/add-product",
+  });
 });
 
 router.post("/add-product", (req, res, next) => {
@@ -20,4 +18,5 @@ router.post("/add-product", (req, res, next) => {
   res.redirect("/");
 });
 
-module.exports = router;
+exports.routes = router;
+exports.products = products;
