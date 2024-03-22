@@ -5,6 +5,7 @@ const { Router } = require("express");
 const rootDir = require("../utils/path,js");
 
 const router = Router();
+const products = [];
 
 router.get("/add-product", (req, res, next) => {
   const fileLocation = path.join(rootDir, "views", "add-product.html");
@@ -12,7 +13,10 @@ router.get("/add-product", (req, res, next) => {
 });
 
 router.post("/add-product", (req, res, next) => {
-  console.log(req.body);
+  const title = req.body.title;
+  products.push({ title });
+
+  console.log("products: ", products);
   res.redirect("/");
 });
 
