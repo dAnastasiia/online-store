@@ -2,7 +2,7 @@ const path = require("path");
 
 const { Router } = require("express");
 
-const rootDir = require("../utils/path");
+const rootDir = require("../utils/path,js");
 
 const router = Router();
 
