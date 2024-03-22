@@ -1,14 +1,11 @@
-const path = require("path");
-
 const { Router } = require("express");
 
-const rootDir = require("../utils/path,js");
+const { products } = require("./admin");
 
 const router = Router();
 
 router.get("/", (req, res, next) => {
-  const fileLocation = path.join(rootDir, "views", "shop.html");
-  res.sendFile(fileLocation);
+  res.render("shop", { pageTitle: "Shop", products, path: "/" });
 });
 
 module.exports = router;
