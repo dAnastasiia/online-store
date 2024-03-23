@@ -1,10 +1,15 @@
 const path = require("path");
 
+// Installed packages
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const adminData = require("./routes/admin");
+// Routes
+const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
+
+// Controllers
+const errorsController = require("./controllers/errors");
 
 const app = express();
 const publicFilesLocation = path.join(__dirname, "public");
@@ -15,11 +20,9 @@ app.set("views", "views");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(publicFilesLocation));
 
-app.use("/admin", adminData.routes);
+app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-app.use("/", (req, res, next) => {
-  res.status(404).render("404", { pageTitle: "Page Not Found" });
-});
+app.use(errorsController.get404Page);
 
 app.listen(4500);
