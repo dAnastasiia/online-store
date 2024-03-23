@@ -3,6 +3,7 @@ const path = require("path");
 const { randomUUID } = require("crypto");
 
 const rootDir = require("../utils/path");
+const Cart = require("./cart");
 
 const dataLocation = path.join(rootDir, "data", "products.json");
 const getProducts = (cb) => {
@@ -53,6 +54,9 @@ module.exports = class Product {
       );
 
       if (existingProductIndex === -1) return;
+
+      const { price } = products[existingProductIndex];
+      Cart.deleteProduct(id, price);
 
       const updatedProductsFirstPart = products.slice(0, existingProductIndex);
       const updatedProductsSecondPart = products.slice(
