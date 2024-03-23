@@ -1,7 +1,9 @@
 const fs = require("fs");
 const path = require("path");
+const { randomUUID } = require("crypto");
 
 const rootDir = require("../utils/path");
+const Cart = require("./cart");
 
 const dataLocation = path.join(rootDir, "data", "products.json");
 const getProducts = (cb) => {
@@ -9,24 +11,74 @@ const getProducts = (cb) => {
     return cb(data ? JSON.parse(data) : []);
   });
 };
+const saveProducts = (products) => {
+  fs.writeFile(dataLocation, JSON.stringify(products), (err) =>
+    console.error(err)
+  );
+};
 
 module.exports = class Product {
-  constructor(title, photoUrl, description, price) {
+  constructor(id, title, photoUrl, description, price) {
+    this.id = id;
     this.title = title;
     this.photoUrl = photoUrl;
     this.description = description;
     this.price = price;
   }
 
-  save() {
+  add() {
     getProducts((products) => {
+      this.id = randomUUID();
       products.push(this);
-      fs.writeFile(dataLocation, JSON.stringify(products), (err) => ({}));
+      saveProducts(products);
+    });
+  }
+
+  update() {
+    getProducts((products) => {
+      const existingProductIndex = products.findIndex(
+        (product) => product.id === this.id
+      );
+
+      if (existingProductIndex === -1) return;
+
+      products[existingProductIndex] = this;
+      saveProducts(products);
+    });
+  }
+
+  static deleteById(id) {
+    getProducts((products) => {
+      const existingProductIndex = products.findIndex(
+        (product) => product.id === id
+      );
+
+      if (existingProductIndex === -1) return;
+
+      const { price } = products[existingProductIndex];
+      Cart.deleteProduct(id, price);
+
+      const updatedProductsFirstPart = products.slice(0, existingProductIndex);
+      const updatedProductsSecondPart = products.slice(
+        existingProductIndex + 1
+      );
+      const updatedProducts = [
+        ...updatedProductsFirstPart,
+        ...updatedProductsSecondPart,
+      ];
+      saveProducts(updatedProducts);
     });
   }
 
   // * method cannot be directly accessed on instances of the class, only on the class itself
   static fetchAll(cb) {
     getProducts(cb);
+  }
+
+  static findById(id, cb) {
+    getProducts((products) => {
+      const product = products.find((product) => product.id === id);
+      cb(product);
+    });
   }
 };

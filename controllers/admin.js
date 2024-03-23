@@ -1,7 +1,8 @@
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
-  res.render("admin/add-product", {
+  res.render("admin/edit-product", {
+    product: null,
     pageTitle: "Add Product",
     path: "/admin/add-product",
   });
@@ -9,10 +10,41 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, photoUrl, description, price } = req.body;
-  const product = new Product(title, photoUrl, description, price);
-  product.save();
+  const product = new Product(null, title, photoUrl, description, price);
+  product.add();
 
-  res.redirect("/");
+  res.redirect("/admin/products");
+};
+
+exports.getEditProduct = (req, res, next) => {
+  const id = req.params.productId;
+
+  // * The way to get query params: req.query[paramName]
+
+  Product.findById(id, (product) => {
+    res.render("admin/edit-product", {
+      product,
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+    });
+  });
+};
+
+exports.postEditProduct = (req, res, next) => {
+  const { id, title, photoUrl, description, price } = req.body;
+
+  const product = new Product(id, title, photoUrl, description, price);
+  product.update();
+
+  res.redirect("/admin/products");
+};
+
+exports.postDeleteProduct = (req, res, next) => {
+  const { id } = req.body;
+
+  Product.deleteById(id);
+
+  res.redirect("/admin/products");
 };
 
 exports.getProducts = (req, res, next) => {
