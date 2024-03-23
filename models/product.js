@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { randomUUID } = require("crypto");
 
 const rootDir = require("../utils/path");
 
@@ -19,6 +20,7 @@ module.exports = class Product {
   }
 
   save() {
+    this.id = randomUUID();
     getProducts((products) => {
       products.push(this);
       fs.writeFile(dataLocation, JSON.stringify(products), (err) => ({}));
@@ -28,5 +30,12 @@ module.exports = class Product {
   // * method cannot be directly accessed on instances of the class, only on the class itself
   static fetchAll(cb) {
     getProducts(cb);
+  }
+
+  static findById(id, cb) {
+    getProducts((products) => {
+      const product = products.find((product) => product.id === id);
+      cb(product);
+    });
   }
 };
