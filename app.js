@@ -23,6 +23,6 @@ app.use(express.static(publicFilesLocation));
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-app.use(errorsController.get404Page);
+app.use(errorsController.get404);
 
 app.listen(4500);
