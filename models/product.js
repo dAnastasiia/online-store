@@ -23,7 +23,9 @@ module.exports = class Product {
     this.id = randomUUID();
     getProducts((products) => {
       products.push(this);
-      fs.writeFile(dataLocation, JSON.stringify(products), (err) => ({}));
+      fs.writeFile(dataLocation, JSON.stringify(products), (err) =>
+        console.log(err)
+      );
     });
   }
 
