@@ -23,9 +23,10 @@
           </div>
 
           <div class="card__actions">
-            <form action="/add-to-cart" method="POST">
-             <button class="btn">Add to Cart</button>
-            </form>
+            <a href="/products/<%= product.id %>" class="btn">Details</a>
+
+            <!-- * Pass object with values due to restrictions of using include inside loops -->
+            <%- include('../includes/add-to-cart.ejs', { product }) %> 
           </div>
         </article>
         <% } %>
@@ -34,5 +35,4 @@
       <p>No Products Found</p>
       <% } %>
     </main>
-
-<%- include('../includes/end.ejs') %>
+    <%- include('../includes/end.ejs') %>
