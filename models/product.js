@@ -46,6 +46,26 @@ module.exports = class Product {
     });
   }
 
+  static deleteById(id) {
+    getProducts((products) => {
+      const existingProductIndex = products.findIndex(
+        (product) => product.id === id
+      );
+
+      if (existingProductIndex === -1) return;
+
+      const updatedProductsFirstPart = products.slice(0, existingProductIndex);
+      const updatedProductsSecondPart = products.slice(
+        existingProductIndex + 1
+      );
+      const updatedProducts = [
+        ...updatedProductsFirstPart,
+        ...updatedProductsSecondPart,
+      ];
+      saveProducts(updatedProducts);
+    });
+  }
+
   // * method cannot be directly accessed on instances of the class, only on the class itself
   static fetchAll(cb) {
     getProducts(cb);

@@ -13,7 +13,7 @@ exports.postAddProduct = (req, res, next) => {
   const product = new Product(null, title, photoUrl, description, price);
   product.add();
 
-  res.redirect("/");
+  res.redirect("/admin/products");
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -35,6 +35,14 @@ exports.postEditProduct = (req, res, next) => {
 
   const product = new Product(id, title, photoUrl, description, price);
   product.update();
+
+  res.redirect("/admin/products");
+};
+
+exports.postDeleteProduct = (req, res, next) => {
+  const { id } = req.body;
+
+  Product.deleteById(id);
 
   res.redirect("/admin/products");
 };
