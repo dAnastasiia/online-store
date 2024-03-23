@@ -10,22 +10,39 @@ const getProducts = (cb) => {
     return cb(data ? JSON.parse(data) : []);
   });
 };
+const saveProducts = (products) => {
+  fs.writeFile(dataLocation, JSON.stringify(products), (err) =>
+    console.error(err)
+  );
+};
 
 module.exports = class Product {
-  constructor(title, photoUrl, description, price) {
+  constructor(id, title, photoUrl, description, price) {
+    this.id = id;
     this.title = title;
     this.photoUrl = photoUrl;
     this.description = description;
     this.price = price;
   }
 
-  save() {
-    this.id = randomUUID();
+  add() {
     getProducts((products) => {
+      this.id = randomUUID();
       products.push(this);
-      fs.writeFile(dataLocation, JSON.stringify(products), (err) =>
-        console.log(err)
+      saveProducts(products);
+    });
+  }
+
+  update() {
+    getProducts((products) => {
+      const existingProductIndex = products.findIndex(
+        (product) => product.id === this.id
       );
+
+      if (existingProductIndex === -1) return;
+
+      products[existingProductIndex] = this;
+      saveProducts(products);
     });
   }
 

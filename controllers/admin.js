@@ -10,8 +10,8 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, photoUrl, description, price } = req.body;
-  const product = new Product(title, photoUrl, description, price);
-  product.save();
+  const product = new Product(null, title, photoUrl, description, price);
+  product.add();
 
   res.redirect("/");
 };
@@ -19,7 +19,7 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const id = req.params.productId;
 
-  // * This is the way gow to get query params: req.query[paramName]
+  // * The way to get query params: req.query[paramName]
 
   Product.findById(id, (product) => {
     res.render("admin/edit-product", {
@@ -28,6 +28,15 @@ exports.getEditProduct = (req, res, next) => {
       path: "/admin/edit-product",
     });
   });
+};
+
+exports.postEditProduct = (req, res, next) => {
+  const { id, title, photoUrl, description, price } = req.body;
+
+  const product = new Product(id, title, photoUrl, description, price);
+  product.update();
+
+  res.redirect("/admin/products");
 };
 
 exports.getProducts = (req, res, next) => {
