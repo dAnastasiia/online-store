@@ -123,6 +123,10 @@ form {
   border-color: #00ee9f;
 }
 
+.centered {
+  text-align: center;
+}
+
 .backdrop {
   position: fixed;
   top: 0;
