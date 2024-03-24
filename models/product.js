@@ -1,21 +1,8 @@
-const fs = require("fs");
-const path = require("path");
 const { randomUUID } = require("crypto");
 
-const rootDir = require("../utils/path");
-const Cart = require("./cart");
+const db = require("../utils/database");
 
-const dataLocation = path.join(rootDir, "data", "products.json");
-const getProducts = (cb) => {
-  fs.readFile(dataLocation, "utf8", (error, data) => {
-    return cb(data ? JSON.parse(data) : []);
-  });
-};
-const saveProducts = (products) => {
-  fs.writeFile(dataLocation, JSON.stringify(products), (err) =>
-    console.error(err)
-  );
-};
+const Cart = require("./cart");
 
 module.exports = class Product {
   constructor(id, title, photoUrl, description, price) {
@@ -27,58 +14,22 @@ module.exports = class Product {
   }
 
   add() {
-    getProducts((products) => {
-      this.id = randomUUID();
-      products.push(this);
-      saveProducts(products);
-    });
+    return db.execute(
+      // `INSERT INTO products (title, price, description, photoUrl) VALUES (${this.title}, ${this.price}, ${this.description}, ${this.photoUrl})`
+      "INSERT INTO products (title, price, description, photoUrl) VALUES (?, ?, ?, ?)",
+      [this.title, this.price, this.description, this.photoUrl]
+    );
   }
 
-  update() {
-    getProducts((products) => {
-      const existingProductIndex = products.findIndex(
-        (product) => product.id === this.id
-      );
+  update() {}
 
-      if (existingProductIndex === -1) return;
+  static deleteById(id) {}
 
-      products[existingProductIndex] = this;
-      saveProducts(products);
-    });
+  static fetchAll() {
+    return db.execute("SELECT * FROM products");
   }
 
-  static deleteById(id) {
-    getProducts((products) => {
-      const existingProductIndex = products.findIndex(
-        (product) => product.id === id
-      );
-
-      if (existingProductIndex === -1) return;
-
-      const { price } = products[existingProductIndex];
-      Cart.deleteProduct(id, price);
-
-      const updatedProductsFirstPart = products.slice(0, existingProductIndex);
-      const updatedProductsSecondPart = products.slice(
-        existingProductIndex + 1
-      );
-      const updatedProducts = [
-        ...updatedProductsFirstPart,
-        ...updatedProductsSecondPart,
-      ];
-      saveProducts(updatedProducts);
-    });
-  }
-
-  // * method cannot be directly accessed on instances of the class, only on the class itself
-  static fetchAll(cb) {
-    getProducts(cb);
-  }
-
-  static findById(id, cb) {
-    getProducts((products) => {
-      const product = products.find((product) => product.id === id);
-      cb(product);
-    });
+  static findById(id) {
+    return db.execute("SELECT * FROM products WHERE products.id = ?", [id]);
   }
 };
