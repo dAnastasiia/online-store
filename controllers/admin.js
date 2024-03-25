@@ -1,5 +1,3 @@
-const { randomUUID } = require("crypto");
-
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -13,7 +11,7 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const { title, photoUrl, description, price } = req.body;
 
-  Product.create({ id: randomUUID(), title, photoUrl, description, price })
+  Product.create({ title, photoUrl, description, price })
     .then(() => res.redirect("/admin/products"))
     .catch((err) => console.error(err));
 };
