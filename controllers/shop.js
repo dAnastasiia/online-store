@@ -2,8 +2,8 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([products]) =>
+  Product.findAll()
+    .then((products) =>
       res.render("shop/product-list", {
         products,
         pageTitle: "All Products",
@@ -16,21 +16,20 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const id = req.params.productId;
 
-  Product.findById(id)
-    .then(([prod]) => {
-      const product = prod[0];
+  Product.findByPk(id)
+    .then((product) =>
       res.render("shop/product-detail", {
         product,
         pageTitle: product.title,
         path: "/products",
-      });
-    })
+      })
+    )
     .catch((err) => console.error(err));
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
-    .then(([products]) =>
+  Product.findAll()
+    .then((products) =>
       res.render("shop/index", {
         products,
         pageTitle: "Shop",
@@ -42,7 +41,7 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   Cart.getProducts((cart) => {
-    Product.fetchAll((products) => {
+    Product.findAll((products) => {
       const cartProducts = [];
       for (let product of products) {
         const cartProduct = cart.products.find(
@@ -65,9 +64,8 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
   const id = req.body.productId;
 
-  Product.findById(id)
-    .then(([prod]) => {
-      const product = prod[0];
+  Product.findByPk(id)
+    .then((product) => {
       Cart.addProduct(id, product.price);
       res.redirect("/cart");
     })
@@ -77,9 +75,8 @@ exports.postCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const id = req.body.productId;
 
-  Product.findById(id)
-    .then(([prod]) => {
-      const product = prod[0];
+  Product.findByPk(id)
+    .then((product) => {
       Cart.deleteProduct(id, product.price);
       res.redirect("/cart");
     })

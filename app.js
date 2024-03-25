@@ -11,6 +11,9 @@ const shopRoutes = require("./routes/shop");
 // Controllers
 const errorsController = require("./controllers/errors");
 
+// Database connection
+const sequelize = require("./utils/database");
+
 const app = express();
 const publicFilesLocation = path.join(__dirname, "public");
 
@@ -25,4 +28,7 @@ app.use(shopRoutes);
 
 app.use(errorsController.get404);
 
-app.listen(4500);
+sequelize
+  .sync()
+  .then(() => app.listen(4500))
+  .catch((err) => console.error(err));
