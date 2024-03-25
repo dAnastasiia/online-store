@@ -9,7 +9,7 @@ const Product = sequelize.define("product", {
     type: Sequelize.STRING,
     allowNull: false,
     primaryKey: true,
-    defaultValue: randomUUID(),
+    defaultValue: () => randomUUID(),
   },
   title: {
     type: Sequelize.STRING,

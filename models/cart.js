@@ -9,7 +9,7 @@ const Cart = sequelize.define("cart", {
     type: Sequelize.STRING,
     allowNull: false,
     primaryKey: true,
-    defaultValue: randomUUID(),
+    defaultValue: () => randomUUID(),
   },
 });
 
