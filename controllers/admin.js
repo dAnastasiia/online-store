@@ -9,23 +9,29 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+  const user = req.user;
   const { title, photoUrl, description, price } = req.body;
 
-  Product.create({ title, photoUrl, description, price })
+  user
+    .createProduct({ title, photoUrl, description, price }) // sequelize method create[Entity] for associations (due to before we define relations in app.js)
     .then(() => res.redirect("/admin/products"))
     .catch((err) => console.error(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
+  const user = req.user;
   const id = req.params.productId;
 
-  Product.findByPk(id)
-    .then((product) =>
-      res.render("admin/edit-product", {
-        product,
-        pageTitle: "Edit Product",
-        path: "/admin/edit-product",
-      })
+  user
+    .getProducts({ where: { id } }) // getProducts here is the method that get only user associated products and search through them
+    .then(
+      // array returns, where the first item is needed object
+      ([product]) =>
+        res.render("admin/edit-product", {
+          product,
+          pageTitle: "Edit Product",
+          path: "/admin/edit-product",
+        })
     )
     .catch((err) => console.error(err));
 };
@@ -55,7 +61,10 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  const user = req.user;
+
+  user
+    .getProducts()
     .then((products) =>
       res.render("admin/products", {
         products,
