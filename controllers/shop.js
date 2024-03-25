@@ -72,9 +72,10 @@ exports.postCart = (req, res, next) => {
       fetchedCart = cart;
       return cart.getProducts({ where: { id } });
     })
-    .then(([product]) => {
-      if (!product) return Product.findByPk(id);
+    .then((products) => {
+      if (!products.length) return Product.findByPk(id);
 
+      const product = products[0];
       const oldQuantity = product.cartItem.quantity;
       quantity = oldQuantity + 1;
 
