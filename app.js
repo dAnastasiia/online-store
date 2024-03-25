@@ -17,8 +17,10 @@ const Product = require("./models/product");
 const User = require("./models/user");
 const Cart = require("./models/cart");
 const CartItem = require("./models/cart-item");
+const Order = require("./models/order");
+const OrderItem = require("./models/order-item");
 
-const TEST_USER__ID = "08310c12-a597-42d1-b030-39d6eea99b1c";
+const TEST_USER__ID = "272835f5-0fde-41e3-b214-5e71fcc5a5b3";
 
 const app = express();
 const publicFilesLocation = path.join(__dirname, "public");
@@ -46,11 +48,19 @@ app.use(errorsController.get404);
 
 // Define database models relations
 Product.belongsTo(User, { constraint: true, onDelete: "CASCADE" });
-Product.belongsToMany(Cart, { through: CartItem });
+//  * We can skip connections duplicate, but no error to write it twice to better readability
+// Product.belongsToMany(Cart, { through: CartItem });
+// Product.belongsToMany(Order, { through: OrderItem });
+
 User.hasMany(Product);
 User.hasOne(Cart);
+User.hasMany(Order);
+
 Cart.belongsTo(User);
 Cart.belongsToMany(Product, { through: CartItem });
+
+Order.belongsTo(User);
+Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
   // ! DEV ONLY: update tables structure and drop the old data:

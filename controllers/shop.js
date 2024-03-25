@@ -1,5 +1,5 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -73,13 +73,20 @@ exports.postCart = (req, res, next) => {
       return cart.getProducts({ where: { id } });
     })
     .then((products) => {
-      if (!products.length) return Product.findByPk(id);
+      let product;
 
-      const product = products[0];
-      const oldQuantity = product.cartItem.quantity;
-      quantity = oldQuantity + 1;
+      if (products.length) {
+        product = products[0];
+      }
 
-      return product;
+      if (product) {
+        const oldQuantity = product.cartItem.quantity;
+        quantity = oldQuantity + 1;
+
+        return product;
+      }
+
+      return Product.findByPk(id);
     })
     .then((product) =>
       fetchedCart.addProduct(product, { through: { quantity } })
@@ -101,15 +108,54 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    path: "/orders",
-    pageTitle: "Your Orders",
-  });
+  const user = req.user;
+
+  user
+    .getOrders({ include: ["products"] }) // include to have references to products, now in orders.ejs we are able to get product ifo to display
+    .then((orders) =>
+      res.render("shop/orders", {
+        orders,
+        path: "/orders",
+        pageTitle: "Your Orders",
+      })
+    )
+    .catch((err) => console.error(err));
 };
 
-exports.getCheckout = (req, res, next) => {
-  res.render("shop/checkout", {
-    path: "/checkout",
-    pageTitle: "Checkout",
-  });
+exports.postOrder = (req, res, next) => {
+  const user = req.user;
+
+  let fetchedCart;
+
+  user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts();
+    })
+    .then((products) =>
+      user
+        .createOrder()
+        .then((order) => {
+          const updatedProducts = products.map((product) => {
+            const quantity = product.cartItem.quantity;
+            product.orderItem = { quantity };
+            return product;
+          });
+
+          return order.addProducts(updatedProducts);
+        })
+        .catch((err) => console.error(err))
+    )
+    .then(() => fetchedCart.setProducts(null))
+    .then(() => res.redirect("/orders"))
+    .catch((err) => console.error(err));
+};
+
+exports.postDeleteOrder = (req, res, next) => {
+  const id = req.body.orderId;
+
+  Order.destroy({ where: { id } })
+    .then(() => res.redirect("/orders"))
+    .catch((err) => console.error(err));
 };

@@ -127,6 +127,12 @@ form {
   text-align: center;
 }
 
+.flex {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .backdrop {
   position: fixed;
   top: 0;
