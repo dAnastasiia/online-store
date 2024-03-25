@@ -127,6 +127,12 @@ form {
   text-align: center;
 }
 
+.flex {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .backdrop {
   position: fixed;
   top: 0;
@@ -195,6 +201,17 @@ form {
 .btn:active {
   background-color: #1b4ed0;
   color: #ffffff;
+}
+
+.btn.danger {
+  color: #b21111;
+  border-color: #b21111;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: #b21111;
+  color: white;
 }
 
 @media (min-width: 768px) {

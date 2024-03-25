@@ -4,13 +4,14 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("../utils/database");
 
-const Cart = sequelize.define("cart", {
+const CartItem = sequelize.define("cartItem", {
   id: {
     type: Sequelize.STRING,
     allowNull: false,
     primaryKey: true,
     defaultValue: () => randomUUID(),
   },
+  quantity: Sequelize.INTEGER,
 });
 
-module.exports = Cart;
+module.exports = CartItem;
