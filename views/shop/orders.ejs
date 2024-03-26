@@ -13,7 +13,7 @@
                            <div class="flex">
                               <h1># <%= order.id %></h1>
                               <form action="/delete-order" method="POST">
-                                 <input type="hidden" value="<%= order.id %>" name="orderId">
+                                 <input type="hidden" value="<%= order._id %>" name="orderId">
                                  <button class="btn danger" type="submit">Delete</button>
                               </form>
                            </div>

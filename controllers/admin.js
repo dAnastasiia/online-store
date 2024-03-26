@@ -8,69 +8,67 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-exports.postAddProduct = (req, res, next) => {
-  const user = req.user;
+exports.postAddProduct = async (req, res, next) => {
   const { title, photoUrl, description, price } = req.body;
 
-  user
-    .createProduct({ title, photoUrl, description, price }) // sequelize method create[Entity] for associations (due to before we define relations in app.js)
-    .then(() => res.redirect("/admin/products"))
-    .catch((err) => console.error(err));
+  const product = new Product(title, photoUrl, description, price);
+
+  try {
+    await product.save();
+    res.redirect("/admin/products");
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-exports.getEditProduct = (req, res, next) => {
-  const user = req.user;
+exports.getEditProduct = async (req, res, next) => {
   const id = req.params.productId;
 
-  user
-    .getProducts({ where: { id } }) // getProducts here is the method that get only user associated products and search through them
-    .then(
-      // array returns, where the first item is needed object
-      ([product]) =>
-        res.render("admin/edit-product", {
-          product,
-          pageTitle: "Edit Product",
-          path: "/admin/edit-product",
-        })
-    )
-    .catch((err) => console.error(err));
+  try {
+    const product = await Product.findById(id);
+    res.render("admin/edit-product", {
+      product,
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const { id, title, photoUrl, description, price } = req.body;
 
-  Product.findByPk(id)
-    .then((product) => {
-      product.title = title;
-      product.price = price;
-      product.photoUrl = photoUrl;
-      product.description = description;
+  const product = new Product(title, photoUrl, description, price, id);
 
-      return product.save();
-    })
-    .then(() => res.redirect("/admin/products"))
-    .catch((err) => console.error(err));
+  try {
+    await product.save();
+    res.redirect("/admin/products");
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-exports.postDeleteProduct = (req, res, next) => {
+exports.postDeleteProduct = async (req, res, next) => {
   const { id } = req.body;
 
-  Product.destroy({ where: { id } })
-    .then(() => res.redirect("/admin/products"))
-    .catch((err) => console.error(err));
+  try {
+    await Product.deleteById(id);
+    res.redirect("/admin/products");
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-exports.getProducts = (req, res, next) => {
-  const user = req.user;
-
-  user
-    .getProducts()
-    .then((products) =>
-      res.render("admin/products", {
-        products,
-        pageTitle: "Admin Products",
-        path: "/admin/products",
-      })
-    )
-    .catch((err) => console.error(err));
+exports.getProducts = async (req, res, next) => {
+  try {
+    const products = await Product.fetchAll();
+    res.render("admin/products", {
+      products,
+      pageTitle: "Admin Products",
+      path: "/admin/products",
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };
