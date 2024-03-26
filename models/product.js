@@ -1,32 +1,62 @@
-const { randomUUID } = require("crypto");
+const { ObjectId } = require("mongodb");
 
-const Sequelize = require("sequelize");
+const { getDb } = require("../utils/database");
 
-const sequelize = require("../utils/database");
+module.exports = class Product {
+  constructor(title, photoUrl, description, price, id, userId) {
+    this.title = title;
+    this.photoUrl = photoUrl;
+    this.description = description;
+    this.price = price;
+    this.userId = userId;
+    this._id = id ? new ObjectId(id) : null;
+  }
 
-const Product = sequelize.define("product", {
-  id: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    primaryKey: true,
-    defaultValue: () => randomUUID(),
-  },
-  title: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  price: {
-    type: Sequelize.DOUBLE,
-    allowNull: false,
-  },
-  description: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  photoUrl: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-});
+  save() {
+    const db = getDb();
+    const dbTable = db.collection("products");
 
-module.exports = Product;
+    try {
+      const { _id } = this;
+      if (_id) {
+        // Update the existing product
+        return dbTable.updateOne({ _id }, { $set: this });
+      }
+
+      // Add new product
+      return dbTable.insertOne(this);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  static findById(id) {
+    const db = getDb();
+
+    try {
+      return db.collection("products").findOne({ _id: new ObjectId(id) });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  static deleteById(id) {
+    const db = getDb();
+
+    try {
+      return db.collection("products").deleteOne({ _id: new ObjectId(id) });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  static fetchAll() {
+    const db = getDb();
+
+    try {
+      return db.collection("products").find().toArray(); // toArray return all at once, while find give you one by one
+    } catch (error) {
+      console.error(error);
+    }
+  }
+};
