@@ -62,8 +62,7 @@ exports.postCart = async (req, res, next) => {
   const id = req.body.productId;
 
   try {
-    const product = await Product.findById(id);
-    await user.addToCart(product);
+    await user.addToCart(id);
 
     res.redirect("/cart");
   } catch (error) {
@@ -76,8 +75,7 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   const id = req.body.productId;
 
   try {
-    const product = await Product.findById(id);
-    await user.removeFromCart(product);
+    await user.removeFromCart(id);
 
     res.redirect("/cart");
   } catch (error) {
@@ -104,8 +102,7 @@ exports.postOrder = async (req, res, next) => {
   const user = req.user;
 
   try {
-    const result = await user.addOrder();
-    console.log("result: ", result);
+    await user.addOrder();
 
     res.redirect("/orders");
   } catch (error) {
@@ -113,10 +110,15 @@ exports.postOrder = async (req, res, next) => {
   }
 };
 
-// exports.postDeleteOrder = (req, res, next) => {
-//   const id = req.body.orderId;
+exports.postDeleteOrder = async (req, res, next) => {
+  const user = req.user;
+  const id = req.body.orderId;
 
-//   Order.destroy({ where: { id } })
-//     .then(() => res.redirect("/orders"))
-//     .catch((err) => console.error(err));
-// };
+  try {
+    await user.deleteOrderById(id);
+
+    res.redirect("/orders");
+  } catch (error) {
+    console.error(error);
+  }
+};
