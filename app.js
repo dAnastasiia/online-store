@@ -18,7 +18,7 @@ const User = require("./models/user");
 const app = express();
 const publicFilesLocation = path.join(__dirname, "public");
 
-const TEST_USER__ID = "6602c5ce58784ac13156b2ad";
+const userId = process.env.TEST_USER_ID;
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -28,9 +28,9 @@ app.use(express.static(publicFilesLocation));
 
 // Temporary middleware
 app.use((req, res, next) => {
-  User.findById(TEST_USER__ID)
+  User.findById(userId)
     .then((user) => {
-      req.user = user; // save user until there is no auth
+      req.user = new User(user.name, user.email, user.cart, user._id); // save user until there is no auth
       next();
     })
     .catch((err) => console.error(err));
