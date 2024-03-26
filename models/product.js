@@ -3,11 +3,12 @@ const { ObjectId } = require("mongodb");
 const { getDb } = require("../utils/database");
 
 module.exports = class Product {
-  constructor(title, photoUrl, description, price, id) {
+  constructor(title, photoUrl, description, price, id, userId) {
     this.title = title;
     this.photoUrl = photoUrl;
     this.description = description;
     this.price = price;
+    this.userId = userId;
     this._id = id ? new ObjectId(id) : null;
   }
 

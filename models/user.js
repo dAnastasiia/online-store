@@ -1,24 +1,30 @@
-const { randomUUID } = require("crypto");
+const { ObjectId } = require("mongodb");
 
-const Sequelize = require("sequelize");
+const { getDb } = require("../utils/database");
 
-const sequelize = require("../utils/database");
+module.exports = class User {
+  constructor(name, email) {
+    this.name = name;
+    this.email = email;
+  }
 
-const User = sequelize.define("user", {
-  id: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    primaryKey: true,
-    defaultValue: () => randomUUID(),
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-});
+  save() {
+    const db = getDb();
 
-module.exports = User;
+    try {
+      return db.collection("users").dbTable.insertOne(this);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  static findById(id) {
+    const db = getDb();
+
+    try {
+      return db.collection("users").findOne({ _id: new ObjectId(id) });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+};
