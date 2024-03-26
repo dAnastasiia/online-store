@@ -1,5 +1,4 @@
 const Product = require("../models/product");
-// const Order = require("../models/order");
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -86,50 +85,33 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-// exports.getOrders = (req, res, next) => {
-//   const user = req.user;
+exports.getOrders = async (req, res, next) => {
+  const user = req.user;
 
-//   user
-//     .getOrders({ include: ["products"] }) // include to have references to products, now in orders.ejs we are able to get product ifo to display
-//     .then((orders) =>
-//       res.render("shop/orders", {
-//         orders,
-//         path: "/orders",
-//         pageTitle: "Your Orders",
-//       })
-//     )
-//     .catch((err) => console.error(err));
-// };
+  try {
+    const orders = await user.getOrders();
+    res.render("shop/orders", {
+      orders,
+      path: "/orders",
+      pageTitle: "Your Orders",
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-// exports.postOrder = (req, res, next) => {
-//   const user = req.user;
+exports.postOrder = async (req, res, next) => {
+  const user = req.user;
 
-//   let fetchedCart;
+  try {
+    const result = await user.addOrder();
+    console.log("result: ", result);
 
-//   user
-//     .getCart()
-//     .then((cart) => {
-//       fetchedCart = cart;
-//       return cart.getProducts();
-//     })
-//     .then((products) =>
-//       user
-//         .createOrder()
-//         .then((order) => {
-//           const updatedProducts = products.map((product) => {
-//             const quantity = product.cartItem.quantity;
-//             product.orderItem = { quantity };
-//             return product;
-//           });
-
-//           return order.addProducts(updatedProducts);
-//         })
-//         .catch((err) => console.error(err))
-//     )
-//     .then(() => fetchedCart.setProducts(null))
-//     .then(() => res.redirect("/orders"))
-//     .catch((err) => console.error(err));
-// };
+    res.redirect("/orders");
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 // exports.postDeleteOrder = (req, res, next) => {
 //   const id = req.body.orderId;

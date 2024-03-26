@@ -2,6 +2,8 @@ const { ObjectId } = require("mongodb");
 
 const { getDb } = require("../utils/database");
 
+const DEFAULT_CART = { products: [], totalPrice: 0 };
+
 module.exports = class User {
   constructor(name, email, cart, id) {
     this.name = name;
@@ -85,9 +87,13 @@ module.exports = class User {
       totalPrice: updatedTotalPrice,
     };
 
-    return db
-      .collection("users")
-      .updateOne({ _id }, { $set: { cart: updatedCart } });
+    try {
+      return db
+        .collection("users")
+        .updateOne({ _id }, { $set: { cart: updatedCart } });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async getCart() {
@@ -112,6 +118,39 @@ module.exports = class User {
       });
 
       return updatedProducts;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async addOrder() {
+    const db = getDb();
+    const { _id, name } = this;
+
+    try {
+      const products = await this.getCart();
+      const order = {
+        products,
+        user: { _id, name },
+      };
+
+      await db.collection("orders").insertOne(order);
+
+      this.cart = { ...DEFAULT_CART };
+
+      return db
+        .collection("users")
+        .updateOne({ _id }, { $set: { cart: this.cart } });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  getOrders() {
+    const db = getDb();
+
+    try {
+      return db.collection("orders").find({ "user._id": this._id }).toArray();
     } catch (error) {
       console.error(error);
     }
