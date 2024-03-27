@@ -1,6 +1,6 @@
 <div class="backdrop"></div>
 <header class="main-header">
-  <button id="side-menu-toggle">Menu</button>
+  <!-- <button id="side-menu-toggle">Menu</button> -->
   <nav class="main-header__nav">
     <ul class="main-header__item-list">
       <li class="main-header__item">
@@ -19,7 +19,7 @@
           >Orders</a
         >
       </li>
-      <li class="main-header__item">
+      <!-- <li class="main-header__item">
         <a
           class="<%= path === '/admin/add-product' ? 'active' : '' %>"
           href="/admin/add-product"
@@ -32,6 +32,14 @@
           href="/admin/products"
           >Admin Products
         </a>
+      </li> -->
+    </ul>
+
+    <ul class="main-header__item-list">
+      <li class="main-header__item">
+        <a class="<%= path === '/login' ? 'active' : '' %>" href="/login"
+          >Login</a
+        >
       </li>
     </ul>
   </nav>
