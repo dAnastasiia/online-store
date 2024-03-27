@@ -1,5 +1,7 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
 
+// ------ Products ------
 exports.getProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
@@ -7,6 +9,19 @@ exports.getProducts = async (req, res, next) => {
       products,
       pageTitle: "All Products",
       path: "/products",
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.getIndex = async (req, res, next) => {
+  try {
+    const products = await Product.find();
+    res.render("shop/index", {
+      products,
+      pageTitle: "Shop",
+      path: "/",
     });
   } catch (error) {
     console.error(error);
@@ -28,19 +43,7 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
-exports.getIndex = async (req, res, next) => {
-  try {
-    const products = await Product.find();
-    res.render("shop/index", {
-      products,
-      pageTitle: "Shop",
-      path: "/",
-    });
-  } catch (error) {
-    console.error(error);
-  }
-};
-
+// ------ Cart ------
 exports.getCart = async (req, res, next) => {
   const user = req.user;
 
@@ -83,11 +86,13 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
+// ------ Orders ------
 exports.getOrders = async (req, res, next) => {
   const user = req.user;
 
   try {
-    const orders = await user.getOrders();
+    const orders = await Order.find({ "user.userId": user._id });
+
     res.render("shop/orders", {
       orders,
       path: "/orders",
@@ -100,9 +105,22 @@ exports.getOrders = async (req, res, next) => {
 
 exports.postOrder = async (req, res, next) => {
   const user = req.user;
+  const { name, _id: userId } = user;
 
   try {
-    await user.addOrder();
+    const cartProducts = await user.getCart();
+
+    const products = cartProducts.map(({ productId, quantity }) => {
+      return {
+        product: { ...productId._doc }, // _doc helps to return not ObjectId, but all content
+        quantity,
+      };
+    });
+
+    const order = new Order({ products, user: { name, userId } });
+
+    await order.save();
+    await user.clearCart();
 
     res.redirect("/orders");
   } catch (error) {
@@ -111,11 +129,10 @@ exports.postOrder = async (req, res, next) => {
 };
 
 exports.postDeleteOrder = async (req, res, next) => {
-  const user = req.user;
   const id = req.body.orderId;
 
   try {
-    await user.deleteOrderById(id);
+    await Order.findOneAndDelete(id);
 
     res.redirect("/orders");
   } catch (error) {
