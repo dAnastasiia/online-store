@@ -5,11 +5,12 @@ exports.getAddProduct = (req, res, next) => {
     product: null,
     pageTitle: "Add Product",
     path: "/admin/add-product",
+    isAuthenticated: req.session.user,
   });
 };
 
 exports.postAddProduct = async (req, res, next) => {
-  const userId = req.user._id;
+  const { _id: userId } = req.user;
   const { title, photoUrl, description, price } = req.body;
 
   const product = new Product({ title, photoUrl, description, price, userId });
@@ -31,6 +32,7 @@ exports.getEditProduct = async (req, res, next) => {
       product,
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
+      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -72,6 +74,7 @@ exports.getProducts = async (req, res, next) => {
       products,
       pageTitle: "Admin Products",
       path: "/admin/products",
+      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
