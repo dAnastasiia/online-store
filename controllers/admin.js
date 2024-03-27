@@ -9,20 +9,13 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = async (req, res, next) => {
-  const userId = req.user._id;
+  //   const userId = req.user._id;
   const { title, photoUrl, description, price } = req.body;
 
-  const product = new Product(
-    title,
-    photoUrl,
-    description,
-    price,
-    null,
-    userId
-  );
+  const product = new Product({ title, photoUrl, description, price });
 
   try {
-    await product.save();
+    await product.save(); // save() i method from from mongoose
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
@@ -47,9 +40,13 @@ exports.getEditProduct = async (req, res, next) => {
 exports.postEditProduct = async (req, res, next) => {
   const { id, title, photoUrl, description, price } = req.body;
 
-  const product = new Product(title, photoUrl, description, price, id);
-
   try {
+    const product = await Product.findById(id);
+    product.title = title;
+    product.photoUrl = photoUrl;
+    product.description = description;
+    product.price = price;
+
     await product.save();
     res.redirect("/admin/products");
   } catch (error) {
@@ -61,7 +58,7 @@ exports.postDeleteProduct = async (req, res, next) => {
   const { id } = req.body;
 
   try {
-    await Product.deleteById(id);
+    await Product.findOneAndDelete(id);
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
@@ -70,7 +67,7 @@ exports.postDeleteProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.fetchAll();
+    const products = await Product.find();
     res.render("admin/products", {
       products,
       pageTitle: "Admin Products",
