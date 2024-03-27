@@ -12,13 +12,14 @@ const shopRoutes = require("./routes/shop");
 const errorsController = require("./controllers/errors");
 
 // Database connection
-const { mongoConnect } = require("./utils/database");
+const mongoose = require("mongoose");
 const User = require("./models/user");
 
 const app = express();
 const publicFilesLocation = path.join(__dirname, "public");
 
 const userId = process.env.TEST_USER_ID;
+const uriDb = process.env.URI_DB;
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -30,7 +31,7 @@ app.use(express.static(publicFilesLocation));
 app.use((req, res, next) => {
   User.findById(userId)
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id); // save user until there is no auth
+      req.user = user; // save user until there is no auth
       next();
     })
     .catch((err) => console.error(err));
@@ -41,4 +42,12 @@ app.use(shopRoutes);
 
 app.use(errorsController.get404);
 
-mongoConnect(() => app.listen(4500));
+mongoose
+  .connect(uriDb)
+  .then(() => {
+    const port = 4500;
+
+    app.listen(port);
+    console.log("Server is listening on port: ", port);
+  })
+  .catch((err) => console.error(err));
