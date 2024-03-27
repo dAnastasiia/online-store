@@ -9,10 +9,10 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = async (req, res, next) => {
-  //   const userId = req.user._id;
+  const userId = req.user._id;
   const { title, photoUrl, description, price } = req.body;
 
-  const product = new Product({ title, photoUrl, description, price });
+  const product = new Product({ title, photoUrl, description, price, userId });
 
   try {
     await product.save(); // save() i method from from mongoose
