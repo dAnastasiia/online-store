@@ -2,9 +2,12 @@ const { Schema, model } = require("mongoose");
 
 const Product = require("./product");
 
+const { DEFAULT_CART } = require("../utils/constants");
+
 const userSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
+  password: { type: String, required: true },
   cart: {
     products: [
       {
@@ -137,7 +140,7 @@ userSchema.methods.removeFromCart = async function (productId) {
 
 // remove all products from cart
 userSchema.methods.clearCart = async function () {
-  this.cart = { products: [], totalPrice: 0 };
+  this.cart = DEFAULT_CART;
   return this.save();
 };
 

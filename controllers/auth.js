@@ -1,5 +1,7 @@
 const User = require("../models/user");
 
+const { DEFAULT_CART } = require("../utils/constants");
+
 const userId = process.env.TEST_USER_ID;
 
 // ------ Signup ------
@@ -11,7 +13,22 @@ exports.getSignup = (req, res, next) => {
   });
 };
 
-exports.postSignup = (req, res, next) => ({});
+exports.postSignup = async (req, res, next) => {
+  const { name, email, password, confirmPassword } = req.body;
+
+  try {
+    const isUserExist = await User.findOne({ email });
+
+    if (isUserExist) return res.redirect("/signup");
+
+    const user = new User({ name, email, password, cart: DEFAULT_CART });
+    await user.save();
+
+    res.redirect("/login");
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 // ------ Login ------
 exports.getLogin = (req, res, next) => {
