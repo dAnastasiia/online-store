@@ -3,6 +3,13 @@ const path = require("path");
 // Installed packages
 const express = require("express");
 const bodyParser = require("body-parser");
+
+// CSRF defense
+const cookieParser = require("cookie-parser");
+const { doubleCsrf } = require("csrf-csrf");
+
+// Database connection
+const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
@@ -17,13 +24,14 @@ const isAuth = require("./middleware/is-auth");
 // Controllers
 const errorsController = require("./controllers/errors");
 
-// Database connection
-const mongoose = require("mongoose");
+// Models
 const User = require("./models/user");
 
 // Constants
+const { MILLISECONDS_IN_DAY } = require("./utils/constants");
 const publicFilesLocation = path.join(__dirname, "public");
 const uriDb = process.env.URI_DB;
+const secret = process.env.CSRF_SECRET;
 
 // Init
 const app = express();
@@ -46,7 +54,7 @@ app.use(express.static(publicFilesLocation));
 app.use(
   session({
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: MILLISECONDS_IN_DAY,
     },
     secret: "my secret",
     resave: false, // improve performance, resave only on change
@@ -55,13 +63,25 @@ app.use(
   })
 );
 
-// Temporary middleware
+// CSRF protection
+const {
+  doubleCsrfProtection, // This is the default CSRF protection middleware.
+} = doubleCsrf({
+  getSecret: () => secret,
+  getTokenFromRequest: (req) => req.body._csrf,
+  cookieName: "x-csrf-token",
+  maxAge: MILLISECONDS_IN_DAY,
+});
+app.use(cookieParser());
+app.use(doubleCsrfProtection);
+
+// Middlewares
 app.use((req, res, next) => {
   if (!req.session.user) return next();
 
   User.findById(req.session.user._id)
     .then((user) => {
-      req.user = user; // setup mongoose user with available methods
+      req.user = user;
       next();
     })
     .catch((err) => console.error(err));
@@ -69,22 +89,24 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.user; // locals are available on all pages
+  res.locals.csrfToken = req.csrfToken();
 
   next();
 });
 
+// Setup routes
 app.use(authRoutes);
 app.use("/admin", isAuth, adminRoutes);
 app.use(shopRoutes);
 
+// Setup errors
 app.use(errorsController.get404);
 
+// Start server
+const PORT = process.env.PORT || 3000;
 mongoose
   .connect(uriDb)
-  .then(() => {
-    const port = 4500;
-
-    app.listen(port);
-    console.log("Server is listening on port: ", port);
-  })
+  .then(() =>
+    app.listen(PORT, () => console.log("Server is listening on port: ", PORT))
+  )
   .catch((err) => console.error(err));
