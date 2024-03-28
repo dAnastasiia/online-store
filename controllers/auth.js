@@ -1,8 +1,9 @@
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 const User = require("../models/user");
 
 const { DEFAULT_CART } = require("../utils/constants");
-
-const userId = process.env.TEST_USER_ID;
 
 // ------ Signup ------
 exports.getSignup = (req, res, next) => {
@@ -19,9 +20,16 @@ exports.postSignup = async (req, res, next) => {
   try {
     const isUserExist = await User.findOne({ email });
 
-    if (isUserExist) return res.redirect("/signup");
+    if (isUserExist) return await res.redirect("/signup");
 
-    const user = new User({ name, email, password, cart: DEFAULT_CART });
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      cart: DEFAULT_CART,
+    });
     await user.save();
 
     res.redirect("/login");
@@ -40,12 +48,18 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.postLogin = async (req, res, next) => {
+  const { email, password } = req.body;
+
   try {
-    const user = await User.findById(userId);
+    const user = await User.findOne({ email });
 
-    req.session.user = user; // session object is provided by express-session
+    if (!user) return await res.redirect("/login");
 
-    // additinal reassuring, that session was created, only after this redirect
+    const isPasswordsMatch = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordsMatch) return await res.redirect("/login");
+
+    req.session.user = user;
     req.session.save((error) => {
       console.error(error);
       res.redirect("/");
