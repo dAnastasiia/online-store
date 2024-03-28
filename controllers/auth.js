@@ -1,41 +1,44 @@
 const crypro = require("node:crypto");
 
+const { validationResult } = require("express-validator");
+
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+const EmailService = require("../services/email-sender");
 const User = require("../models/user");
 
 const { DEFAULT_CART, MILLISECONDS_IN_HOUR } = require("../utils/constants");
-const EmailService = require("../services/email-sender");
 
 // ------ Signup ------
 exports.getSignup = (req, res, next) => {
-  let errorMessage = req.flash("error"); // get an access by key
-
-  if (errorMessage.length > 0) {
-    errorMessage = errorMessage[0];
-  } else {
-    errorMessage = null; // clear if no message
-  }
+  const errors = validationResult(req);
 
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    errorMessage,
+    errorMessage: errors.array()[0]?.msg,
+    oldInput: null,
+    validationErrors: null,
   });
 };
 
 exports.postSignup = async (req, res, next) => {
-  const { name, email, password, confirmPassword } = req.body;
+  const { name, email, password } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      errorMessage: errors.array()[0].msg,
+      oldInput: { name, email },
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
-    const isUserExist = await User.findOne({ email });
-
-    if (isUserExist) {
-      req.flash("error", "Email already in use");
-      return await res.redirect("/signup");
-    }
-
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const user = new User({
@@ -73,24 +76,49 @@ exports.getLogin = (req, res, next) => {
     pageTitle: "Login",
     path: "/login",
     errorMessage,
+    oldInput: null,
+    validationErrors: null,
   });
 };
 
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login",
+      errorMessage: errors.array()[0].msg,
+      oldInput: { email },
+      validationErrors: errors.array(),
+    });
+  }
+
   try {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return await res.redirect("/login");
+      return res.status(422).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "User not found",
+        oldInput: null,
+        validationErrors: null,
+      });
     }
 
     const isPasswordsMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordsMatch) {
-      req.flash("error", "Inavalid credentials"); // setup message by key
-      return await res.redirect("/login");
+      return res.status(422).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "Inavalid credentials",
+        oldInput: { email },
+        validationErrors: null,
+      });
     }
 
     req.session.user = user;
