@@ -5,7 +5,9 @@
 <body>
   <%- include('../includes/navigation.ejs') %>
   <main>
-    <% if (products.length) { %>
+    <% if (!products?.length) { %>
+    <h1>No products in cart yet...</h1>
+    <% } else { %>
     <ul class="cart__item-list">
       <% products.forEach(product => { %>
       <li class="cart__item">
@@ -27,8 +29,6 @@
         <button class="btn" type="submit">Order Now!</button>
       </form>
     </div>
-    <% } else { %>
-    <h1>No Products in Cart!</h1>
     <% } %>
   </main>
   <%- include('../includes/end.ejs') %>
