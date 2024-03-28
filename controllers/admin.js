@@ -38,10 +38,17 @@ exports.getEditProduct = async (req, res, next) => {
 };
 
 exports.postEditProduct = async (req, res, next) => {
+  const { _id: userId } = req.user;
   const { id, title, photoUrl, description, price } = req.body;
 
   try {
     const product = await Product.findById(id);
+
+    const isCurrentUserProduct =
+      product.userId.toString() === userId.toString();
+
+    if (!isCurrentUserProduct) return res.redirect("/");
+
     product.title = title;
     product.photoUrl = photoUrl;
     product.description = description;
@@ -55,10 +62,11 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.postDeleteProduct = async (req, res, next) => {
+  const { userId } = req.user;
   const { id } = req.body;
 
   try {
-    await Product.findOneAndDelete(id);
+    await Product.deleteOne({ id, userId });
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
@@ -66,8 +74,11 @@ exports.postDeleteProduct = async (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
+  const { _id: userId } = req.user;
+
   try {
-    const products = await Product.find();
+    const products = await Product.find({ userId }); // show only current user's products, but POST requests also should be protected
+
     res.render("admin/products", {
       products,
       pageTitle: "Admin Products",
