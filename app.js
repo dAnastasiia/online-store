@@ -11,6 +11,9 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
+// Middlewares
+const isAuth = require("./middleware/is-auth");
+
 // Controllers
 const errorsController = require("./controllers/errors");
 
@@ -65,7 +68,7 @@ app.use((req, res, next) => {
 });
 
 app.use(authRoutes);
-app.use("/admin", adminRoutes);
+app.use("/admin", isAuth, adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorsController.get404);
