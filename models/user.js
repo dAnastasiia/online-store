@@ -21,6 +21,8 @@ const userSchema = new Schema({
     ],
     totalPrice: Number,
   },
+  resetToken: String,
+  resetTokenExp: Date,
 });
 
 // add product to the cart
