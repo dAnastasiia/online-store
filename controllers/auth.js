@@ -2,6 +2,18 @@ const User = require("../models/user");
 
 const userId = process.env.TEST_USER_ID;
 
+// ------ Signup ------
+exports.getSignup = (req, res, next) => {
+  res.render("auth/signup", {
+    path: "/signup",
+    pageTitle: "Signup",
+    isAuthenticated: false,
+  });
+};
+
+exports.postSignup = (req, res, next) => ({});
+
+// ------ Login ------
 exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     pageTitle: "Login",
@@ -26,6 +38,7 @@ exports.postLogin = async (req, res, next) => {
   }
 };
 
+// ------ Logout ------
 exports.postLogout = (req, res, next) => {
   req.session.destroy((error) => {
     console.error(error);
