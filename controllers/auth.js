@@ -4,6 +4,7 @@ const saltRounds = 10;
 const User = require("../models/user");
 
 const { DEFAULT_CART } = require("../utils/constants");
+const EmailService = require("../services/email-sender");
 
 // ------ Signup ------
 exports.getSignup = (req, res, next) => {
@@ -44,6 +45,13 @@ exports.postSignup = async (req, res, next) => {
     await user.save();
 
     res.redirect("/login");
+
+    EmailService.sendMail({
+      from: "no-reply@demomailtrap.com",
+      to: email,
+      subject: "Hello from Mailtrap!",
+      html: `<h1>${name}, welcome to system!</h1>`,
+    });
   } catch (error) {
     console.error(error);
   }
