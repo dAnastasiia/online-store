@@ -11,6 +11,7 @@ router.get("/signup", authController.getSignup);
 router.post(
   "/signup",
   [
+    check("name", "Name is too short").isAlpha().isLength({ min: 6 }),
     check("email")
       .isEmail()
       .withMessage("Invalid email")
@@ -26,8 +27,12 @@ router.post(
         } catch (error) {
           console.error(error);
         }
-      }),
-    body("password", "Invalid password").isLength({ min: 5 }).isAlphanumeric(),
+      })
+      .normalizeEmail(),
+    body("password", "Invalid password")
+      .isLength({ min: 5 })
+      .isAlphanumeric()
+      .trim(),
     body("confirmPassword", "Passwords have to match").custom(
       (value, { req: { password } }) => value === password
     ),
@@ -45,8 +50,11 @@ router.get("/login", authController.getLogin);
 router.post(
   "/login",
   [
-    body("email").isEmail().withMessage("Invalid email"),
-    body("password", "Invalid password").isLength({ min: 5 }).isAlphanumeric(),
+    body("email").isEmail().withMessage("Invalid email").normalizeEmail(),
+    body("password", "Invalid password")
+      .isLength({ min: 5 })
+      .isAlphanumeric()
+      .trim(),
   ],
   authController.postLogin
 );
