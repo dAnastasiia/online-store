@@ -9,7 +9,6 @@ exports.getProducts = async (req, res, next) => {
       products,
       pageTitle: "All Products",
       path: "/products",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -23,7 +22,6 @@ exports.getIndex = async (req, res, next) => {
       products,
       pageTitle: "Shop",
       path: "/",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -39,7 +37,6 @@ exports.getProduct = async (req, res, next) => {
       product,
       pageTitle: product.title,
       path: "/products",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -57,7 +54,6 @@ exports.getCart = async (req, res, next) => {
       products,
       path: "/cart",
       pageTitle: "Your Cart",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -101,7 +97,6 @@ exports.getOrders = async (req, res, next) => {
       orders,
       path: "/orders",
       pageTitle: "Your Orders",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);

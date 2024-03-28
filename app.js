@@ -67,6 +67,12 @@ app.use((req, res, next) => {
     .catch((err) => console.error(err));
 });
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.user; // locals are available on all pages
+
+  next();
+});
+
 app.use(authRoutes);
 app.use("/admin", isAuth, adminRoutes);
 app.use(shopRoutes);
