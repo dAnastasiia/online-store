@@ -7,10 +7,18 @@ const { DEFAULT_CART } = require("../utils/constants");
 
 // ------ Signup ------
 exports.getSignup = (req, res, next) => {
+  let errorMessage = req.flash("error"); // get an access by key
+
+  if (errorMessage.length > 0) {
+    errorMessage = errorMessage[0];
+  } else {
+    errorMessage = null; // clear if no message
+  }
+
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    isAuthenticated: false,
+    errorMessage,
   });
 };
 
@@ -20,7 +28,10 @@ exports.postSignup = async (req, res, next) => {
   try {
     const isUserExist = await User.findOne({ email });
 
-    if (isUserExist) return await res.redirect("/signup");
+    if (isUserExist) {
+      req.flash("error", "Email already in use");
+      return await res.redirect("/signup");
+    }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -40,9 +51,18 @@ exports.postSignup = async (req, res, next) => {
 
 // ------ Login ------
 exports.getLogin = (req, res, next) => {
+  let errorMessage = req.flash("error");
+
+  if (errorMessage.length > 0) {
+    errorMessage = errorMessage[0];
+  } else {
+    errorMessage = null;
+  }
+
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
+    errorMessage,
   });
 };
 
@@ -52,11 +72,16 @@ exports.postLogin = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
 
-    if (!user) return await res.redirect("/login");
+    if (!user) {
+      return await res.redirect("/login");
+    }
 
     const isPasswordsMatch = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordsMatch) return await res.redirect("/login");
+    if (!isPasswordsMatch) {
+      req.flash("error", "Inavalid credentials"); // setup message by key
+      return await res.redirect("/login");
+    }
 
     req.session.user = user;
     req.session.save((error) => {

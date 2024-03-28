@@ -3,10 +3,9 @@ const path = require("path");
 // Installed packages
 const express = require("express");
 const bodyParser = require("body-parser");
-
-// CSRF defense
 const cookieParser = require("cookie-parser");
 const { doubleCsrf } = require("csrf-csrf");
+const flash = require("connect-flash");
 
 // Database connection
 const mongoose = require("mongoose");
@@ -74,6 +73,7 @@ const {
 });
 app.use(cookieParser());
 app.use(doubleCsrfProtection);
+app.use(flash()); // special area of the session used for storing messages
 
 // Middlewares
 app.use((req, res, next) => {
