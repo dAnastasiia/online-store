@@ -42,16 +42,16 @@ exports.postSignup = async (req, res, next) => {
       password: hashedPassword,
       cart: DEFAULT_CART,
     });
-    await user.save();
 
-    res.redirect("/login");
-
-    EmailService.sendMail({
-      from: "no-reply@demomailtrap.com",
+    await EmailService.sendMail({
+      from: "mailtrap@demomailtrap.com",
       to: email,
       subject: "Hello from Mailtrap!",
       html: `<h1>${name}, welcome to system!</h1>`,
     });
+
+    await user.save();
+    res.redirect("/login");
   } catch (error) {
     console.error(error);
   }
