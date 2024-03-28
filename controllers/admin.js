@@ -5,7 +5,6 @@ exports.getAddProduct = (req, res, next) => {
     product: null,
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    isAuthenticated: req.session.user,
   });
 };
 
@@ -32,7 +31,6 @@ exports.getEditProduct = async (req, res, next) => {
       product,
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
@@ -74,7 +72,6 @@ exports.getProducts = async (req, res, next) => {
       products,
       pageTitle: "Admin Products",
       path: "/admin/products",
-      isAuthenticated: req.session.user,
     });
   } catch (error) {
     console.error(error);
