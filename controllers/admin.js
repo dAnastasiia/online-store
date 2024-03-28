@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -5,12 +7,30 @@ exports.getAddProduct = (req, res, next) => {
     product: null,
     pageTitle: "Add Product",
     path: "/admin/add-product",
+    isEditMode: false,
+    hasError: false,
+    errorMessage: null,
+    validationErrors: null,
   });
 };
 
 exports.postAddProduct = async (req, res, next) => {
   const { _id: userId } = req.user;
   const { title, photoUrl, description, price } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      isEditMode: false,
+      hasError: true,
+      product: { title, photoUrl, description, price },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
 
   const product = new Product({ title, photoUrl, description, price, userId });
 
@@ -27,10 +47,17 @@ exports.getEditProduct = async (req, res, next) => {
 
   try {
     const product = await Product.findById(id);
+
+    if (!product) return res.redirect("/");
+
     res.render("admin/edit-product", {
       product,
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
+      isEditMode: true,
+      hasError: false,
+      errorMessage: null,
+      validationErrors: null,
     });
   } catch (error) {
     console.error(error);
@@ -40,6 +67,26 @@ exports.getEditProduct = async (req, res, next) => {
 exports.postEditProduct = async (req, res, next) => {
   const { _id: userId } = req.user;
   const { id, title, photoUrl, description, price } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+      isEditMode: true,
+      hasError: true,
+      product: {
+        _id: id,
+        title,
+        photoUrl,
+        description,
+        price,
+      },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
     const product = await Product.findById(id);
@@ -62,11 +109,11 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.postDeleteProduct = async (req, res, next) => {
-  const { userId } = req.user;
-  const { id } = req.body;
+  const { _id: userId } = req.user;
+  const { id: _id } = req.body;
 
   try {
-    await Product.deleteOne({ id, userId });
+    await Product.deleteOne({ _id, userId });
     res.redirect("/admin/products");
   } catch (error) {
     console.error(error);
