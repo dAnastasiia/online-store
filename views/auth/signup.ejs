@@ -11,22 +11,22 @@
     <div class="user-message user-message--error"><%= errorMessage %></div>
     <% } %>
 
-    <form class="login-form" action="/signup" method="POST">
+    <form novalidate class="auth-form" action="/signup" method="POST">
       <div class="form-control">
         <label for="name">Name</label>
-        <input type="text" name="name" id="name">
+        <input class="<%= validationErrors?.find(e => e.path === 'name') ? 'invalid' : '' %>" type="text" name="name" id="name" value="<% if (oldInput) { %><%= oldInput.name %><% } %>" />
       </div>
       <div class="form-control">
         <label for="email">Email</label>
-        <input type="email" name="email" id="email">
+        <input class="<%= validationErrors?.find(e => e.path === 'email') ? 'invalid' : '' %>" type="email" name="email" id="email" value="<% if (oldInput) { %><%= oldInput.email %><% } %>">
       </div>
       <div class="form-control">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        <input class="<%= validationErrors?.find(e => e.path === 'password') ? 'invalid' : '' %>" type="password" name="password" id="password">
       </div>
       <div class="form-control">
         <label for="confirmPassword">Confirm Password</label>
-        <input type="password" name="confirmPassword" id="confirmPassword">
+        <input class="<%= validationErrors?.find(e => e.path === 'confirmPassword') ? 'invalid' : '' %>" type="password" name="confirmPassword" id="confirmPassword">
       </div>
 
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
