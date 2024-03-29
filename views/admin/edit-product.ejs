@@ -1,6 +1,10 @@
 <%- include('../includes/head.ejs') %>
-<link rel="stylesheet" href="/css/forms.css">
-<link rel="stylesheet" href="/css/product.css">
+<link
+    rel="stylesheet"
+    href="/css/forms.css">
+<link
+    rel="stylesheet"
+    href="/css/product.css">
 </head>
 
 <body>
@@ -8,33 +12,78 @@
 
   <main>
     <% if (errorMessage) { %>
-    <div class="user-message user-message--error"><%= errorMessage %></div>
+    <div
+        class="user-message user-message--error">
+      <%= errorMessage %>
+    </div>
     <% } %>
 
-    <form class="product-form" action="/admin/<% if (isEditMode) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
-      <div class="form-control">
-        <label for="title">Title</label>
-        <input class="<%= validationErrors?.find(e => e.path === 'title') ? 'invalid' : '' %>" type="text" name="title" id="title" value="<% if (isEditMode || hasError) { %><%= product.title %><% } %>">
+    <form
+        class="product-form"
+        action="/admin/<% if (isEditMode) { %>edit-product<% } else { %>add-product<% } %>"
+        method="POST">
+      <div
+          class="form-control">
+        <label
+            for="title">Title</label>
+        <input
+            class="<%= validationErrors?.find(e => e.path === 'title') ? 'invalid' : '' %>"
+            type="text"
+            name="title"
+            id="title"
+            value="<% if (isEditMode || errorMessage) { %><%= product.title %><% } %>">
       </div>
-      <div class="form-control">
-        <label for="photoUrl">Photo URL</label>
-        <input class="<%= validationErrors?.find(e => e.path === 'photoUrl') ? 'invalid' : '' %>" type="text" name="photoUrl" id="photoUrl" value="<% if (isEditMode || hasError) { %><%= product.photoUrl %><% } %>">
+      <div
+          class="form-control">
+        <label
+            for="photoUrl">Photo
+          URL</label>
+        <input
+            class="<%= validationErrors?.find(e => e.path === 'photoUrl') ? 'invalid' : '' %>"
+            type="text"
+            name="photoUrl"
+            id="photoUrl"
+            value="<% if (isEditMode || errorMessage) { %><%= product.photoUrl %><% } %>">
       </div>
-      <div class="form-control">
-        <label for="price">Price</label>
-        <input class="<%= validationErrors?.find(e => e.path === 'price') ? 'invalid' : '' %>" type="number" name="price" id="price" step="0.01" value="<% if (isEditMode || hasError) { %><%= product.price %><% } %>">
+      <div
+          class="form-control">
+        <label
+            for="price">Price</label>
+        <input
+            class="<%= validationErrors?.find(e => e.path === 'price') ? 'invalid' : '' %>"
+            type="number"
+            name="price"
+            id="price"
+            step="0.01"
+            value="<% if (isEditMode || errorMessage) { %><%= product.price %><% } %>">
       </div>
-      <div class="form-control">
-        <label for="description">Description</label>
-        <textarea class="<%= validationErrors?.find(e => e.path === 'description') ? 'invalid' : '' %>" name="description" id="description" rows="5"><% if (isEditMode || hasError) { %><%= product.description %><% } %></textarea>
+      <div
+          class="form-control">
+        <label
+            for="description">Description</label>
+        <textarea
+            class="<%= validationErrors?.find(e => e.path === 'description') ? 'invalid' : '' %>"
+            name="description"
+            id="description"
+            rows="5"><% if (isEditMode || errorMessage) { %><%= product.description %><% } %></textarea>
       </div>
 
       <% if (isEditMode) { %>
-      <input type="hidden" value="<%= product._id %>" name="id">
+      <input
+          type="hidden"
+          value="<%= product._id %>"
+          name="id">
       <% } %>
 
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn" type="submit"><% if (isEditMode) { %>Update Product<% } else { %>Add Product<% } %></button>
+      <input
+          type="hidden"
+          name="_csrf"
+          value="<%= csrfToken %>">
+      <button
+          class="btn"
+          type="submit"><% if (isEditMode) { %>Update
+        Product<% } else { %>Add
+        Product<% } %></button>
     </form>
   </main>
   <%- include('../includes/end.ejs') %>

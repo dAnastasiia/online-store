@@ -8,7 +8,6 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     isEditMode: false,
-    hasError: false,
     errorMessage: null,
     validationErrors: null,
   });
@@ -25,7 +24,6 @@ exports.postAddProduct = async (req, res, next) => {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       isEditMode: false,
-      hasError: true,
       product: { title, photoUrl, description, price },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
@@ -65,7 +63,6 @@ exports.getEditProduct = async (req, res, next) => {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
       isEditMode: true,
-      hasError: false,
       errorMessage: null,
       validationErrors: null,
     });
@@ -87,7 +84,6 @@ exports.postEditProduct = async (req, res, next) => {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
       isEditMode: true,
-      hasError: true,
       product: {
         _id: id,
         title,
