@@ -75,23 +75,29 @@ app.use(cookieParser());
 app.use(doubleCsrfProtection);
 app.use(flash()); // special area of the session used for storing messages
 
-// Middlewares
 app.use((req, res, next) => {
-  if (!req.session.user) return next();
-
-  User.findById(req.session.user._id)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.error(err));
-});
-
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.user; // locals are available on all pages
+  res.locals.isAuthenticated = req.session.user; // * locals are available on all pages
   res.locals.csrfToken = req.csrfToken();
 
   next();
+});
+
+// Middlewares
+app.use(async (req, res, next) => {
+  if (!req.session.user) return next();
+
+  try {
+    const user = await User.findById(req.session.user._id);
+
+    if (!user) return next();
+
+    req.user = user;
+    next();
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 });
 
 // Setup routes
@@ -100,7 +106,18 @@ app.use("/admin", isAuth, adminRoutes);
 app.use(shopRoutes);
 
 // Setup errors
+app.use("/500", errorsController.get500);
 app.use(errorsController.get404);
+
+// Specific error-handling middleware
+app.use((error, req, res, next) => {
+  // * it gets calls of 'next(error)' function
+  //   res.redirect("/500");
+  res.status(500).render("500", {
+    pageTitle: "Server error",
+    path: "/500",
+  });
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;

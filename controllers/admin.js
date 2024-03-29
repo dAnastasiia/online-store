@@ -32,13 +32,23 @@ exports.postAddProduct = async (req, res, next) => {
     });
   }
 
-  const product = new Product({ title, photoUrl, description, price, userId });
+  const product = new Product({
+    title,
+    photoUrl,
+    description,
+    price,
+    userId,
+  });
 
   try {
-    await product.save(); // save() i method from from mongoose
+    await product.save(); // * save() i method from from mongoose
     res.redirect("/admin/products");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    //  return res.redirect("/500"); // * this approach is only lead to code duplication
+
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error); // * this means that we skip all middlewares and go right into errors handling
   }
 };
 
@@ -59,8 +69,10 @@ exports.getEditProduct = async (req, res, next) => {
       errorMessage: null,
       validationErrors: null,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -103,8 +115,10 @@ exports.postEditProduct = async (req, res, next) => {
 
     await product.save();
     res.redirect("/admin/products");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -115,8 +129,10 @@ exports.postDeleteProduct = async (req, res, next) => {
   try {
     await Product.deleteOne({ _id, userId });
     res.redirect("/admin/products");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -124,14 +140,16 @@ exports.getProducts = async (req, res, next) => {
   const { _id: userId } = req.user;
 
   try {
-    const products = await Product.find({ userId }); // show only current user's products, but POST requests also should be protected
+    const products = await Product.find({ userId }); // * show only current user's products, but POST requests also should be protected
 
     res.render("admin/products", {
       products,
       pageTitle: "Admin Products",
       path: "/admin/products",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };

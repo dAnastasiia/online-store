@@ -10,8 +10,10 @@ exports.getProducts = async (req, res, next) => {
       pageTitle: "All Products",
       path: "/products",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -23,8 +25,10 @@ exports.getIndex = async (req, res, next) => {
       pageTitle: "Shop",
       path: "/",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -38,8 +42,10 @@ exports.getProduct = async (req, res, next) => {
       pageTitle: product.title,
       path: "/products",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -55,8 +61,10 @@ exports.getCart = async (req, res, next) => {
       path: "/cart",
       pageTitle: "Your Cart",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -68,8 +76,10 @@ exports.postCart = async (req, res, next) => {
     await user.addToCart(id);
 
     res.redirect("/cart");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -81,8 +91,10 @@ exports.postCartDeleteProduct = async (req, res, next) => {
     await user.removeFromCart(id);
 
     res.redirect("/cart");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -98,8 +110,10 @@ exports.getOrders = async (req, res, next) => {
       path: "/orders",
       pageTitle: "Your Orders",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -112,7 +126,7 @@ exports.postOrder = async (req, res, next) => {
 
     const products = cartProducts.map(({ productId, quantity }) => {
       return {
-        product: { ...productId._doc }, // _doc helps to return not ObjectId, but all content
+        product: { ...productId._doc }, // * _doc helps to return not ObjectId, but all content
         quantity,
       };
     });
@@ -123,8 +137,10 @@ exports.postOrder = async (req, res, next) => {
     await user.clearCart();
 
     res.redirect("/orders");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -135,7 +151,9 @@ exports.postDeleteOrder = async (req, res, next) => {
     await Order.findOneAndDelete(id);
 
     res.redirect("/orders");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
