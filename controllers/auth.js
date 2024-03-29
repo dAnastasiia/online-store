@@ -57,8 +57,10 @@ exports.postSignup = async (req, res, next) => {
       html: `<h1>${name}, welcome to system!</h1>`,
     });
     res.redirect("/login");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -126,8 +128,10 @@ exports.postLogin = async (req, res, next) => {
       console.error(error);
       res.redirect("/");
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -184,13 +188,15 @@ exports.postReset = async (req, res, next) => {
     });
 
     res.redirect("/");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
 exports.getPassword = async (req, res, next) => {
-  const { token: resetToken } = req.params; // get url parameter
+  const { token: resetToken } = req.params;
 
   let errorMessage = req.flash("error");
 
@@ -203,7 +209,7 @@ exports.getPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({
       resetToken,
-      resetTokenExp: { $gt: Date.now() }, // $gt — GREATER THAN special comparison syntax
+      resetTokenExp: { $gt: Date.now() }, // * $gt — GREATER THAN special comparison syntax
     });
 
     if (!user) return res.redirect("/");
@@ -215,8 +221,10 @@ exports.getPassword = async (req, res, next) => {
       userId: user._id.toString(),
       resetToken,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -244,7 +252,9 @@ exports.postPassword = async (req, res, next) => {
     await user.save();
 
     return res.redirect("/login");
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
