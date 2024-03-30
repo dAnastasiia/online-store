@@ -3,6 +3,7 @@ const path = require("path");
 // Installed packages
 const express = require("express");
 const bodyParser = require("body-parser");
+const multer = require("multer");
 const cookieParser = require("cookie-parser");
 const { doubleCsrf } = require("csrf-csrf");
 const flash = require("connect-flash");
@@ -41,12 +42,35 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 
-store.on("error", (error) => console.error(error));
+// Setup storage for files
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images"); // local 'images' folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now().toString()}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedMimetypes = ["image/png", "image/jpg", "image/jpeg"];
+
+  if (allowedMimetypes.includes(file.mimetype)) {
+    return cb(null, true);
+  } else {
+    return cb(null, false);
+  }
+};
+
+// store.on("error", (error) => console.error(error));
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+// Middleware with parsers
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(multer({ storage, fileFilter }).single("image"));
+
 app.use(express.static(publicFilesLocation));
 
 // Setup session and pass the store for sessions
@@ -75,6 +99,7 @@ app.use(cookieParser());
 app.use(doubleCsrfProtection);
 app.use(flash()); // special area of the session used for storing messages
 
+// Middlewares
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.user; // * locals are available on all pages
   res.locals.csrfToken = req.csrfToken();
@@ -82,7 +107,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middlewares
 app.use(async (req, res, next) => {
   if (!req.session.user) return next();
 
@@ -95,7 +119,6 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     const error = new Error(err);
-    error.httpStatusCode = 500;
     return next(error);
   }
 });
@@ -112,7 +135,7 @@ app.use(errorsController.get404);
 // Specific error-handling middleware
 app.use((error, req, res, next) => {
   // * it gets calls of 'next(error)' function
-  //   res.redirect("/500");
+
   res.status(500).render("500", {
     pageTitle: "Server error",
     path: "/500",

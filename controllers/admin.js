@@ -15,7 +15,19 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = async (req, res, next) => {
   const { _id: userId } = req.user;
-  const { title, photoUrl, description, price } = req.body;
+  const { title, description, price } = req.body; // * we have parsers in app.js, it's in charge of parsing and extracting values
+  const image = req.file;
+
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      isEditMode: false,
+      product: { title, description, price },
+      errorMessage: "Attached file isn't an image",
+      validationErrors: [],
+    });
+  }
 
   const errors = validationResult(req);
 
@@ -24,11 +36,13 @@ exports.postAddProduct = async (req, res, next) => {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       isEditMode: false,
-      product: { title, photoUrl, description, price },
+      product: { title, description, price },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
+
+  const photoUrl = image.path || "";
 
   const product = new Product({
     title,
@@ -39,7 +53,7 @@ exports.postAddProduct = async (req, res, next) => {
   });
 
   try {
-    await product.save(); // * save() i method from from mongoose
+    await product.save(); // * save() is a method from mongoose
     res.redirect("/admin/products");
   } catch (err) {
     //  return res.redirect("/500"); // * this approach is only lead to code duplication
@@ -75,7 +89,8 @@ exports.getEditProduct = async (req, res, next) => {
 
 exports.postEditProduct = async (req, res, next) => {
   const { _id: userId } = req.user;
-  const { id, title, photoUrl, description, price } = req.body;
+  const { id, title, description, price } = req.body;
+  const image = req.file;
 
   const errors = validationResult(req);
 
@@ -87,7 +102,6 @@ exports.postEditProduct = async (req, res, next) => {
       product: {
         _id: id,
         title,
-        photoUrl,
         description,
         price,
       },
@@ -105,9 +119,12 @@ exports.postEditProduct = async (req, res, next) => {
     if (!isCurrentUserProduct) return res.redirect("/");
 
     product.title = title;
-    product.photoUrl = photoUrl;
     product.description = description;
     product.price = price;
+
+    if (image) {
+      product.photoUrl = image.path;
+    }
 
     await product.save();
     res.redirect("/admin/products");
