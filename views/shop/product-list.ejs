@@ -28,11 +28,14 @@
           <a href="/products/<%= product._id %>" class="btn">Details</a>
 
           <!-- * Pass object with values due to restrictions of using include inside loops -->
-          <% if(isAuthenticated) { %> <%- include('../includes/add-to-cart.ejs', { product }) %> <% } %>
+          <% if(isAuthenticated) { %>
+          <%- include('../includes/add-to-cart.ejs', { product }) %> <% } %>
         </div>
       </article>
       <% } %>
     </div>
+
+    <%- include('../includes/pagination.ejs') %>
     <% } %>
   </main>
   <%- include('../includes/end.ejs') %>

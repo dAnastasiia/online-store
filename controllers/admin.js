@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const Product = require("../models/product");
 
 const { deleteFile } = require("../utils/file");
+const { ITEMS_PER_PAGE } = require("../utils/constants");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -160,14 +161,28 @@ exports.postDeleteProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   const { _id: userId } = req.user;
+  const page = +req.query.page || 1; // transform to number
 
   try {
-    const products = await Product.find({ userId }); // * show only current user's products, but POST requests also should be protected
+    const totalItems = await Product.find().countDocuments();
+
+    const products = await Product.find({ userId }) // * show only current user's products, but POST requests also should be protected
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    const hasNextPage = ITEMS_PER_PAGE * page < totalItems;
+    const lastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
     res.render("admin/products", {
       products,
       pageTitle: "Admin Products",
       path: "/admin/products",
+      hasNextPage,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage,
+      currentPage: page,
     });
   } catch (err) {
     const error = new Error(err);

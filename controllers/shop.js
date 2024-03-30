@@ -8,14 +8,32 @@ const Order = require("../models/order");
 
 const { createInvoice } = require("../utils/methods");
 
+const { ITEMS_PER_PAGE } = require("../utils/constants");
+
 // ------ Products ------
 exports.getProducts = async (req, res, next) => {
+  const page = +req.query.page || 1;
+
   try {
-    const products = await Product.find();
+    const totalItems = await Product.find().countDocuments();
+
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    const hasNextPage = ITEMS_PER_PAGE * page < totalItems;
+    const lastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
     res.render("shop/product-list", {
       products,
       pageTitle: "All Products",
       path: "/products",
+      hasNextPage,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage,
+      currentPage: page,
     });
   } catch (err) {
     const error = new Error(err);
@@ -25,12 +43,28 @@ exports.getProducts = async (req, res, next) => {
 };
 
 exports.getIndex = async (req, res, next) => {
+  const page = +req.query.page || 1; // transform to number
+
   try {
-    const products = await Product.find();
+    const totalItems = await Product.find().countDocuments();
+
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE) // *don't display previous data
+      .limit(ITEMS_PER_PAGE);
+
+    const hasNextPage = ITEMS_PER_PAGE * page < totalItems;
+    const lastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
     res.render("shop/index", {
       products,
       pageTitle: "Shop",
       path: "/",
+      hasNextPage,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage,
+      currentPage: page,
     });
   } catch (err) {
     const error = new Error(err);
