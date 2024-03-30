@@ -93,7 +93,7 @@ const {
   doubleCsrfProtection, // This is the default CSRF protection middleware.
 } = doubleCsrf({
   getSecret: () => secret,
-  getTokenFromRequest: (req) => req.body._csrf,
+  getTokenFromRequest: (req) => req.body._csrf || req.headers["x-csrf-token"], // * handle both JS requests and HTTP through form
   cookieName: "x-csrf-token",
   maxAge: MILLISECONDS_IN_DAY,
 });
