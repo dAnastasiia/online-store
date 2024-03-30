@@ -8,6 +8,8 @@ const Order = require("../models/order");
 
 const { createInvoice } = require("../utils/methods");
 
+const { ITEMS_PER_PAGE } = require("../utils/constants");
+
 // ------ Products ------
 exports.getProducts = async (req, res, next) => {
   try {
@@ -25,8 +27,12 @@ exports.getProducts = async (req, res, next) => {
 };
 
 exports.getIndex = async (req, res, next) => {
+  const { page } = req.query;
+
   try {
-    const products = await Product.find();
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE) // *don't display previous data
+      .limit(ITEMS_PER_PAGE);
     res.render("shop/index", {
       products,
       pageTitle: "Shop",
