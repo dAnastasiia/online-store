@@ -12,7 +12,8 @@
       "program": "${workspaceFolder}/app.js",
       "restart": true,
       "runtimeExecutable": "nodemon", // should be installed globally
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
