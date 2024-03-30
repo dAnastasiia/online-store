@@ -1,8 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
+const PDFDocument = require("pdfkit");
+
 const Product = require("../models/product");
 const Order = require("../models/order");
+const { createInvoice } = require("../utils/methods");
 
 // ------ Products ------
 exports.getProducts = async (req, res, next) => {
@@ -167,33 +170,27 @@ exports.getInvoice = async (req, res, next) => {
   const { orderId } = req.params;
 
   try {
-    const order = await Order.find({ orderId, "user.userId": userId });
+    const order = await Order.findById(orderId);
 
-    if (!order) return next(new Error("No order found")); // Protection of showing data to unauthorized user
+    //  ({ orderId, "user.userId": userId });
+
+    if (!order) return next(new Error("No order found"));
+
+    if (order.user.userId.toString() !== userId.toString())
+      return next(new Error("Unauthorized")); // Protection of showing data to unauthorized user
 
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join("data", "invoices", invoiceName);
 
-    //  * This can take a lot of time if we are storing big files, we should use STREAMING instead
-    //  fs.readFile(invoicePath, (err, data) => {
-    //    if (err) return next(err);
-
-    // * setup file extension
-    //    res.setHeader("Content-Type", "application/pdf");
-
-    // * setup how to open file ('inline' means opening in browser, 'attachment' — download)
-    //    res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
-
-    // * return file
-    //    res.send(data);
-    //  });
-
-    // * download step by step
-    const file = fs.createReadStream(invoicePath);
+    const doc = new PDFDocument();
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
+    doc.pipe(fs.createWriteStream(invoicePath));
+    doc.pipe(res);
 
-    file.pipe(res);
+    createInvoice(doc, order);
+
+    doc.end(); // * end of pipe
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
