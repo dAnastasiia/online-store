@@ -1,5 +1,5 @@
 {
   "formatting": true,
   "editorconfig": true,
-  "wrap_line_length": 1
+  "wrap_line_length": 80
 }
