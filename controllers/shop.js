@@ -28,6 +28,13 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  /**
+   * * PAGINATION
+   * * Code example: https://stackoverflow.com/questions/3799193/mysql-data-best-way-to-implement-paging
+   *
+   * * Quickly sum: The LIMIT command allows you to restrict the amount of data points you fetch. Combined with the OFFSET command you can control how many items you want to fetch and how many you want to skip.
+   */
+
   Product.findAll()
     .then((products) =>
       res.render("shop/index", {
