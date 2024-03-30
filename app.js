@@ -30,6 +30,7 @@ const User = require("./models/user");
 // Constants
 const { MILLISECONDS_IN_DAY } = require("./utils/constants");
 const publicFilesLocation = path.join(__dirname, "public");
+const imagesLocation = path.join(__dirname, "images");
 const uriDb = process.env.URI_DB;
 const secret = process.env.CSRF_SECRET;
 
@@ -62,7 +63,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// store.on("error", (error) => console.error(error));
+store.on("error", (error) => console.error(error));
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -72,6 +73,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer({ storage, fileFilter }).single("image"));
 
 app.use(express.static(publicFilesLocation));
+app.use("/images", express.static(imagesLocation));
 
 // Setup session and pass the store for sessions
 app.use(

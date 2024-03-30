@@ -42,7 +42,7 @@ exports.postAddProduct = async (req, res, next) => {
     });
   }
 
-  const photoUrl = image.path || "";
+  const photoUrl = "/" + image.path;
 
   const product = new Product({
     title,
@@ -123,7 +123,7 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = price;
 
     if (image) {
-      product.photoUrl = image.path;
+      product.photoUrl = "/" + image.path;
     }
 
     await product.save();
