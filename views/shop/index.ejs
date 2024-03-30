@@ -29,16 +29,14 @@
 
           <!-- * Pass object with values due to restrictions of using include inside loops -->
           <% if(isAuthenticated) { %>
-          <%- include('../includes/add-to-cart.ejs', { product }) %> <% } %>
+          <%- include('../includes/add-to-cart.ejs', { product }) %>
+          <% } %>
         </div>
       </article>
       <% } %>
     </div>
 
-    <section class="pagination">
-      <a href="/?page=1">1</a>
-      <a href="/?page=2">2</a>
-    </section>
+    <%- include('../includes/pagination.ejs') %>
     <% } %>
   </main>
   <%- include('../includes/end.ejs') %>
