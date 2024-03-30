@@ -33,6 +33,10 @@ router.post(
   adminController.postEditProduct
 );
 
-router.post("/delete-product", adminController.postDeleteProduct);
+// * It for request through page
+// router.post("/delete-product", adminController.postDeleteProduct);
+
+// * For requests from JS code we can use other http requests
+router.delete("/product/:productId", adminController.deleteProduct);
 
 module.exports = router;

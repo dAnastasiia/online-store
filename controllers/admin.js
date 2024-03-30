@@ -139,9 +139,29 @@ exports.postEditProduct = async (req, res, next) => {
   }
 };
 
-exports.postDeleteProduct = async (req, res, next) => {
+// exports.postDeleteProduct = async (req, res, next) => {
+//   const { _id: userId } = req.user;
+//   const { id: _id } = req.body;
+
+//   try {
+//     const product = await Product.findById(_id);
+
+//     if (!product) return next(new Error("Product not found"));
+
+//     await Product.deleteOne({ _id, userId });
+//     deleteFile(product.photoUrl);
+
+//     res.redirect("/admin/products");
+//   } catch (err) {
+//     const error = new Error(err);
+//     error.httpStatusCode = 500;
+//     return next(error);
+//   }
+// };
+
+exports.deleteProduct = async (req, res, next) => {
+  const { productId: _id } = req.params;
   const { _id: userId } = req.user;
-  const { id: _id } = req.body;
 
   try {
     const product = await Product.findById(_id);
@@ -151,11 +171,9 @@ exports.postDeleteProduct = async (req, res, next) => {
     await Product.deleteOne({ _id, userId });
     deleteFile(product.photoUrl);
 
-    res.redirect("/admin/products");
+    res.status(200).json({ message: "Successfully deleted" });
   } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    return next(error);
+    res.status(500).json({ message: "Error has occured" });
   }
 };
 
