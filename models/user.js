@@ -111,26 +111,26 @@ userSchema.methods.removeFromCart = async function (productId) {
 
     if (existingProductIndex === -1) return;
 
-    let updatedProducts = [];
-    let updatedTotalPrice = 0;
+    const updatedProductsFirstPart = cart.products.slice(
+      0,
+      existingProductIndex
+    );
+    const updatedProductsSecondPart = cart.products.slice(
+      existingProductIndex + 1
+    );
+    const products = [
+      ...updatedProductsFirstPart,
+      ...updatedProductsSecondPart,
+    ];
 
-    cart.products.forEach((product) => {
-      const id = product.productId;
-      const price = productId?.price;
-      const quantity = product.quantity;
-
-      if (price && productId !== id) {
-        updatedTotalPrice += +price * quantity;
-        updatedProducts.push({
-          productId: id,
-          quantity,
-        });
-      }
-    });
+    const totalPrice = products.reduce((result, { productId, quantity }) => {
+      const { price } = productId._doc;
+      return (result += quantity * price);
+    }, 0);
 
     const updatedCart = {
-      products: updatedProducts,
-      totalPrice: updatedTotalPrice,
+      products,
+      totalPrice,
     };
 
     this.cart = updatedCart;
