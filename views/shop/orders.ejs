@@ -11,15 +11,17 @@
     <ul class="orders">
       <% orders.forEach(order => { %>
       <li class="orders__item">
-        <h1>Order #<%= order._id %> — <a
-              href="/orders/<%= order._id %>">Invoice</a></h1>
+        <div class="flex">
+          <h1>Order #<%= order._id %> — <a
+                href="/orders/<%= order._id %>">Invoice</a></h1>
 
-        <!-- * Deletion for developer needs 
-         <form action="/delete-order" method="POST">
+          <!-- * Deletion for developer needs  -->
+          <form action="/delete-order" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" value="<%= order._id %>" name="orderId">
             <button class="btn danger" type="submit">Delete</button>
-          </form> -->
+          </form>
+        </div>
 
         <ul class="orders__products">
           <% order.products.forEach(p => { %>
