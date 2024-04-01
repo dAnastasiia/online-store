@@ -12,13 +12,14 @@
       <% orders.forEach(order => { %>
       <li class="orders__item">
         <div class="flex">
-          <h1>Order — # <%= order._id %></h1>
+          <h1>Order #<%= order._id %> — <a
+                href="/orders/<%= order._id %>">Invoice</a></h1>
+
+          <!-- * Deletion for developer needs  -->
           <form action="/delete-order" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" value="<%= order._id %>" name="orderId">
             <button class="btn danger" type="submit">Delete</button>
-
-            <a href="/orders/<%= order._id %>" target="_blank">Invoice</a>
           </form>
         </div>
 

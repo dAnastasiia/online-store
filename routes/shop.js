@@ -15,9 +15,13 @@ router.post("/cart", isAuth, shopController.postCart);
 router.post("/cart-delete-item", isAuth, shopController.postCartDeleteProduct);
 
 router.get("/orders", isAuth, shopController.getOrders);
-router.post("/create-order", isAuth, shopController.postOrder);
 router.post("/delete-order", isAuth, shopController.postDeleteOrder);
-
 router.get("/orders/:orderId", isAuth, shopController.getInvoice);
+
+router.get("/checkout", shopController.getCheckout);
+router.get("/checkout/cancel", shopController.getCheckout);
+
+// ! Now manual entering this route will be move cart to orders without paying, in real backend it should be webhook (check payment route and controller)
+router.get("/checkout/success", shopController.postCheckoutSuccess);
 
 module.exports = router;

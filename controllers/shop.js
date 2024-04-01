@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocument = require("pdfkit");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const Product = require("../models/product");
 const Order = require("../models/order");
@@ -158,33 +159,6 @@ exports.getOrders = async (req, res, next) => {
   }
 };
 
-exports.postOrder = async (req, res, next) => {
-  const user = req.user;
-  const { name, _id: userId } = user;
-
-  try {
-    const cartProducts = await user.getCart();
-
-    const products = cartProducts.map(({ productId, quantity }) => {
-      return {
-        product: { ...productId._doc }, // * _doc helps to return not ObjectId, but all content
-        quantity,
-      };
-    });
-
-    const order = new Order({ products, user: { name, userId } });
-
-    await order.save();
-    await user.clearCart();
-
-    res.redirect("/orders");
-  } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    return next(error);
-  }
-};
-
 exports.postDeleteOrder = async (req, res, next) => {
   const id = req.body.orderId;
 
@@ -199,7 +173,7 @@ exports.postDeleteOrder = async (req, res, next) => {
   }
 };
 
-// Invoices
+// ------ Invoices  ------
 exports.getInvoice = async (req, res, next) => {
   const { _id: userId } = req.user;
   const { orderId } = req.params;
@@ -226,6 +200,93 @@ exports.getInvoice = async (req, res, next) => {
     createInvoice(doc, order);
 
     doc.end(); // * end of pipe
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+// ------ Payments  ------
+exports.getCheckout = async (req, res, next) => {
+  const user = req.user;
+
+  try {
+    const cartProducts = await user.getCart();
+
+    let totalSum = 0;
+
+    const products = cartProducts.map(({ productId, quantity }) => {
+      const { price } = productId._doc;
+      totalSum += quantity * price;
+
+      return {
+        product: { ...productId._doc }, // * _doc helps to return not ObjectId, but all content
+        quantity,
+      };
+    });
+
+    const url = `${req.protocol}://${req.get("host")}`;
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+
+      success_url: `${url}/checkout/success`,
+      cancel_url: `${url}/checkout/cancel`,
+
+      line_items: products.map(
+        ({ product: { title: name, description, price }, quantity }) => {
+          return {
+            price_data: {
+              currency: "usd",
+              unit_amount: price * 100,
+
+              product_data: {
+                name,
+                description,
+              },
+            },
+            quantity,
+          };
+        }
+      ),
+    });
+
+    return res.render("shop/checkout", {
+      path: "/checkout",
+      pageTitle: "Checkout",
+      products,
+      totalSum,
+      sessionId: session.id,
+      stripeKey: process.env.STRIPE_PUBLIC_KEY,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.postCheckoutSuccess = async (req, res, next) => {
+  const user = req.user;
+  const { name, _id: userId } = user;
+
+  try {
+    const cartProducts = await user.getCart();
+
+    const products = cartProducts.map(({ productId, quantity }) => {
+      return {
+        product: { ...productId._doc }, // * _doc helps to return not ObjectId, but all content
+        quantity,
+      };
+    });
+
+    const order = new Order({ products, user: { name, userId } });
+
+    await order.save();
+    await user.clearCart();
+
+    res.redirect("/orders");
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
