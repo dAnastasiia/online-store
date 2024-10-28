@@ -3,7 +3,7 @@
 This is an online store **view-based** server application built with Node.js, utilizing either MongoDB with Mongoose or MySQL with Sequelize as the database, providing functionalities such as user authentication, product management, cart management, and order processing. The application also incorporates various third-party services like Nodemailer with SendGrid for email functionalities and Stripe for payment processing.
 
 ## Disclaimer
-Experimentation purposes only.  
+Experimental purposes only.  
 **Please Note:** This project is a learning project created for exploring different functionalities and technologies. As such, it contains code duplication, comments, or described errors that are solely for educational purposes and may not adhere to best practices in software development. 
 
 ## Technologies Used
